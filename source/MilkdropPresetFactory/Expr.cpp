@@ -107,18 +107,17 @@ float ValExpr::eval_val_expr ( int mesh_i, int mesh_j )
 					//assert ( term.param->matrix != NULL );
 
 					/// @slow boolean check could be expensive in this critical (and common) step of evaluation
-//					assert(mesh_i >= 0 && mesh_j >= 0);
-/*					if ( mesh_i >= 0 )
+					if ( mesh_i >= 0 )
 					{
 						if ( mesh_j >= 0 )
-						{*/
+						{
 							return ( ( ( float** ) term.param->matrix ) [mesh_i][mesh_j] );
-/*						}
+						}
 						else
 						{
 							return ( ( ( float* ) term.param->matrix ) [mesh_i] );
 						}
-					}*/
+					}
 					//assert(mesh_i >=0);
 				}
 				//std::cout << term.param->name << ": " << (*((float*)term.param->engine_val)) << std::endl;
@@ -165,15 +164,15 @@ float TreeExpr::eval_tree_expr ( int mesh_i, int mesh_j )
 		case INFIX_MULT:
 			return ( left_arg * right_arg );
 		case INFIX_MOD:
-			if (!FLOAT2BOOL(right_arg))
+			if (!(int)right_arg)
 				return PROJECTM_DIV_BY_ZERO;
-			return ( FLOAT2INT(left_arg) % FLOAT2INT(right_arg) );
+			return ( (int)left_arg % (int)right_arg );
 		case INFIX_OR:
-			return ( FLOAT2INT(left_arg) | FLOAT2INT(right_arg) );
+			return ( (int)left_arg | (int)right_arg );
 		case INFIX_AND:
-			return ( FLOAT2INT(left_arg) & FLOAT2INT(right_arg) );
+			return ( (int)left_arg & (int)right_arg );
 		case INFIX_DIV:
-			if (!FLOAT2BOOL(right_arg))
+			if (!(int)right_arg)
 				return MAX_DOUBLE_SIZE;
 			return ( left_arg / right_arg );
 		default:

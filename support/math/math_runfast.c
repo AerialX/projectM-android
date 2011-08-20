@@ -23,6 +23,7 @@ void
 enable_runfast()
 {
 #ifdef __arm__
+#ifdef __MATH_NEON
 	static const unsigned int x = 0x04086060;
 	static const unsigned int y = 0x03000000;
 	int r;
@@ -34,5 +35,6 @@ enable_runfast()
 		: "=r"(r)
 		: "r"(x), "r"(y)
 	);
+#endif
 #endif
 }

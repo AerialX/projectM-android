@@ -14,7 +14,7 @@
 class Preset;
 
 Renderer::Renderer(int width, int height, int gx, int gy, int texsize, BeatDetect *beatDetect, std::string _presetURL,
-		std::string _titlefontURL, std::string _menufontURL) :
+		std::string _titlefontURL, std::string _menufontURL, bool enableFBO, bool enableFBOFast) :
 	texsize(texsize), mesh(gx, gy), m_presetName("None"), vw(width), vh(height), title_fontURL(_titlefontURL), menu_fontURL(_menufontURL), presetURL(_presetURL)
 {
 	this->totalframes = 1;
@@ -36,7 +36,7 @@ Renderer::Renderer(int width, int height, int gx, int gy, int texsize, BeatDetec
 	this->aspect = (float) height / (float) width;;
 
 	/// @bug put these on member init list
-	this->renderTarget = new RenderTarget(texsize, width, height);
+	this->renderTarget = new RenderTarget(texsize, width, height, enableFBO, enableFBOFast);
 	this->textureManager = new TextureManager(presetURL);
 	this->beatDetect = beatDetect;
 
@@ -105,8 +105,10 @@ void Renderer::ResetTextures()
 {
 	textureManager->Clear();
 
+	bool enableFBO = renderTarget->enableFBO;
+	bool enableFBOFast = renderTarget->enableFBOFast;
 	delete (renderTarget);
-	renderTarget = new RenderTarget(texsize, vw, vh);
+	renderTarget = new RenderTarget(texsize, vw, vh, enableFBO, enableFBOFast);
 	reset(vw, vh);
 
 	textureManager->Preload();
@@ -188,14 +190,12 @@ void Renderer::Pass2(const Pipeline &pipeline, const PipelineContext &pipelineCo
 	//video texture memory and render fullscreen.
 
 	/** Reset the viewport size */
-#ifdef USE_FBO
 	if (renderTarget->renderToTexture)
 	{
 		glBindFramebufferOES(GL_FRAMEBUFFER_OES, this->renderTarget->fbuffer[1]);
 		glViewport(0, 0, this->renderTarget->texsize, this->renderTarget->texsize);
 	}
 	else
-#endif
 		glViewport(0, 0, this->vw, this->vh);
 
 	glBindTexture(GL_TEXTURE_2D, this->renderTarget->textureID[0]);
@@ -232,15 +232,12 @@ void Renderer::Pass2(const Pipeline &pipeline, const PipelineContext &pipelineCo
 		draw_stats();
 	glTranslatef(0.5, 0.5, 0);
 #endif
-#ifdef USE_FBO
 	if (renderTarget->renderToTexture)
 		glBindFramebufferOES(GL_FRAMEBUFFER_OES, this->renderTarget->framebuffer);
-#endif
 }
 
 void Renderer::RenderFrame(const Pipeline &pipeline, const PipelineContext &pipelineContext)
 {
-
 	SetupPass1(pipeline, pipelineContext);
 
 #ifdef USE_CG
@@ -252,13 +249,14 @@ void Renderer::RenderFrame(const Pipeline &pipeline, const PipelineContext &pipe
 #endif
 
 	RenderItems(pipeline, pipelineContext);
+
 	FinishPass1();
 	Pass2(pipeline, pipelineContext);
 }
 
 void Renderer::Interpolation(const Pipeline &pipeline)
 {
-	if (this->renderTarget->useFBO)
+	if (this->renderTarget->useFBO && !renderTarget->enableFBOFast)
 		glBindTexture(GL_TEXTURE_2D, renderTarget->textureID[1]);
 	else
 		glBindTexture(GL_TEXTURE_2D, renderTarget->textureID[0]);

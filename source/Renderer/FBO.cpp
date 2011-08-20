@@ -51,7 +51,6 @@ RenderTarget::~RenderTarget() {
 
 	glDeleteTextures( 1, &this->textureID[0]);
 
-#ifdef USE_FBO
 	if (useFBO) 
          {
 		glDeleteTextures( 1, &this->textureID[1] );
@@ -64,15 +63,11 @@ RenderTarget::~RenderTarget() {
 		    glDeleteFramebuffersOES(1, &this->fbuffer[1]);
 		  }
          }
-#endif
-
 }
 
 GLuint RenderTarget::initRenderToTexture()
 {
-#ifdef USE_FBO
-
-  if (this->useFBO==1)
+  if (this->useFBO)
     {
       this->renderToTexture=1;
       
@@ -91,18 +86,17 @@ GLuint RenderTarget::initRenderToTexture()
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       glFramebufferTexture2DOES( GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, this->textureID[2], 0 );
       return this->textureID[2];
     }
-#endif 
 return -1;
       
 }
 
 /** Creates new pbuffers */
-RenderTarget::RenderTarget(int texsize, int width, int height) : useFBO(false) {
+RenderTarget::RenderTarget(int texsize, int width, int height, bool enableFBO, bool enableFBOFast) : useFBO(false), enableFBO(enableFBO), enableFBOFast(enableFBOFast) {
 
    int mindim = 0;
    int origtexsize = 0;
@@ -111,38 +105,58 @@ RenderTarget::RenderTarget(int texsize, int width, int height) : useFBO(false) {
    this->texsize = texsize;
    this->framebuffer = 0;
 
-#ifdef USE_FBO
+    mindim = width < height ? width : height;
+    origtexsize = this->texsize;
+    texsize = this->texsize = nearestPower2( mindim, SCALE_MINIFY );
+
+	if (enableFBO) {
 	  GLuint   fb,  depth_rb, rgba_tex,  other_tex;
 	  
+	glGetError();
 	  glGenTextures(1, &other_tex);
+		checkOpenGL("RenderTarget:genTexture");
 	  glBindTexture(GL_TEXTURE_2D,other_tex);
+		checkOpenGL("RenderTarget:bindTexture");
 	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	  //glGenerateMipmapOES(GL_TEXTURE_2D);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texsize, texsize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		checkOpenGL("RenderTarget:texParams");
+	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		checkOpenGL("RenderTarget:TexImage2D");
 	  glBindTexture(GL_TEXTURE_2D, 0);
 	  
 	  glGenTextures(1, &rgba_tex);
+		checkOpenGL("RenderTarget:genTexture");
 	  glBindTexture(GL_TEXTURE_2D, rgba_tex); 
 	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	  //glGenerateMipmapOES(GL_TEXTURE_2D);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texsize, texsize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		checkOpenGL("RenderTarget:texParams");
+	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		checkOpenGL("RenderTarget:TexImage2D");
 	  glBindTexture(GL_TEXTURE_2D, 0);
+		checkOpenGL("RenderTarget:bindTexture");
 	
 	  glGenRenderbuffersOES(1, &depth_rb);
+		checkOpenGL("RenderTarget:genRenderbuffer");
 	  glBindRenderbufferOES(GL_RENDERBUFFER_OES, depth_rb);
+		checkOpenGL("RenderTarget:bindRenderbuffer");
 	  glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, this->texsize, this->texsize);
+		checkOpenGL("RenderTarget:renderbufferStorage");
 	  
 	  glGenFramebuffersOES(1, &fb);
+		checkOpenGL("RenderTarget:genFramebuffer");
 	  glBindFramebufferOES(GL_FRAMEBUFFER_OES, fb);
+		checkOpenGL("RenderTarget:bindFramebuffer");
 	  glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, rgba_tex, 0);
+		checkOpenGL("RenderTarget:genFramebufferTexture");
 	  
 	  glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depth_rb);
+		checkOpenGL("RenderTarget:framebufferRenderbuffer");
 	  
 	  this->fbuffer[0] = fb;
 	  this->depthb[0] = depth_rb;
@@ -160,7 +174,7 @@ RenderTarget::RenderTarget(int texsize, int width, int height) : useFBO(false) {
 	  }	
 	  std::cerr << "[projecM] warning: FBO support not detected. Using fallback." << std::endl;
 
-#endif 
+	}
 
 // Can reach here via two code paths: 
 // (1) useFBO was set to false externally by cmake / system setting / etc.
@@ -170,9 +184,6 @@ RenderTarget::RenderTarget(int texsize, int width, int height) : useFBO(false) {
     /** Check the texture size against the viewport size */
     /** If the viewport is smaller, then we'll need to scale the texture size down */
     /** If the viewport is larger, scale it up */
-    mindim = width < height ? width : height;
-    origtexsize = this->texsize;
-    this->texsize = nearestPower2( mindim, SCALE_MINIFY );
 	glGetError();
         glGenTextures(1, &this->textureID[0] );
 		checkOpenGL("RenderTarget:genTexture");
@@ -242,7 +253,7 @@ RenderTarget::RenderTarget(int texsize, int width, int height) : useFBO(false) {
 /** Locks the pbuffer */
 void RenderTarget::lock() {
 
-#ifdef USE_FBO
+
   if(this->useFBO)
     { 
 //		glEnable(GL_DEPTH_TEST);
@@ -251,36 +262,111 @@ void RenderTarget::lock() {
 #else
       glBindFramebufferOES(GL_FRAMEBUFFER_OES, this->fbuffer[0]);
 #endif
-    }
-#endif
+    } else {
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+	  glBindRenderbufferOES(GL_RENDERBUFFER_OES, 0);
+	}
     }
 
 /** Unlocks the pbuffer */
 void RenderTarget::unlock() {
+	glGetError();
 
-#ifdef USE_FBO
   if(this->useFBO)
     {
 //		glDisable(GL_DEPTH_TEST);
       glBindTexture( GL_TEXTURE_2D, this->textureID[1] );
+	checkOpenGL("unlock:bindTexture");
 #ifndef FBO_HACK
+	if (!enableFBOFast) {
       glCopyTexSubImage2D( GL_TEXTURE_2D,
                          0, 0, 0, 0, 0, 
                          this->texsize, this->texsize );
+	if (checkOpenGL("unlock:copyTexSubImage"))
+		useFBO = false;
+	}
 #endif
       glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+	checkOpenGL("unlock:bindFramebuffer");
       return;
     }
-#endif
     /** Fallback texture path */
     
-	glGetError();
     glBindTexture( GL_TEXTURE_2D, this->textureID[0] );
 	checkOpenGL("unlock:bindTexture");
 	//return;
     
 	glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, this->texsize, this->texsize );
 	if (checkOpenGL("unlock:copyTexSubImage")) {
+	if (enableFBO) {
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+	  glBindRenderbufferOES(GL_RENDERBUFFER_OES, 0);
+	  GLuint   fb,  depth_rb, rgba_tex,  other_tex;
+	  
+	  glGenTextures(1, &other_tex);
+		checkOpenGL("RenderTarget:genTexture");
+	  glBindTexture(GL_TEXTURE_2D,other_tex);
+		checkOpenGL("RenderTarget:bindTexture");
+	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	  //glGenerateMipmapOES(GL_TEXTURE_2D);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		checkOpenGL("RenderTarget:texParams");
+	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		checkOpenGL("RenderTarget:TexImage2D");
+	  glBindTexture(GL_TEXTURE_2D, 0);
+	  
+	  glGenTextures(1, &rgba_tex);
+		checkOpenGL("RenderTarget:genTexture");
+	  glBindTexture(GL_TEXTURE_2D, rgba_tex); 
+	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	  //glGenerateMipmapOES(GL_TEXTURE_2D);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		checkOpenGL("RenderTarget:texParams");
+	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		checkOpenGL("RenderTarget:TexImage2D");
+	  glBindTexture(GL_TEXTURE_2D, 0);
+		checkOpenGL("RenderTarget:bindTexture");
+	
+	  glGenRenderbuffersOES(1, &depth_rb);
+		checkOpenGL("RenderTarget:genRenderbuffer");
+	  glBindRenderbufferOES(GL_RENDERBUFFER_OES, depth_rb);
+		checkOpenGL("RenderTarget:bindRenderbuffer");
+	  glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, this->texsize, this->texsize);
+		checkOpenGL("RenderTarget:renderbufferStorage");
+	  
+	  glGenFramebuffersOES(1, &fb);
+		checkOpenGL("RenderTarget:genFramebuffer");
+	  glBindFramebufferOES(GL_FRAMEBUFFER_OES, fb);
+		checkOpenGL("RenderTarget:bindFramebuffer");
+	  glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, rgba_tex, 0);
+		checkOpenGL("RenderTarget:genFramebufferTexture");
+	  
+	  glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depth_rb);
+		checkOpenGL("RenderTarget:framebufferRenderbuffer");
+	  
+	  this->fbuffer[0] = fb;
+	  this->depthb[0] = depth_rb;
+	  this->textureID[0] = rgba_tex;
+#if defined(FBO_HACK) || defined(FBO_HACK2)
+	  this->textureID[1] = rgba_tex;
+#else
+	  this->textureID[1] = other_tex;
+#endif
+	  
+	  GLenum status = glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+	  if (status == GL_FRAMEBUFFER_COMPLETE_OES) {
+		  useFBO = true;
+	    return;
+	  }	
+	  std::cerr << "[projecM] warning: FBO support not detected. Using fallback." << std::endl;
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
+	  glBindRenderbufferOES(GL_RENDERBUFFER_OES, 0);
+	}
+
 		glGenTextures(1, &this->textureID[0]);
 		checkOpenGL("unlock:genTexture");
 		glBindTexture(GL_TEXTURE_2D, this->textureID[0]);

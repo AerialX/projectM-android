@@ -429,8 +429,6 @@ static void *thread_callback(void *prjm) {
 
 
         count++;
-        #ifndef WIN32
-#if 0
         /** Frame-rate limiter */
         /** Compute once per preset */
         if ( this->count%100==0 )
@@ -451,8 +449,6 @@ static void *thread_callback(void *prjm) {
                 if ( usleep ( sleepTime ) != 0 ) {}}
         }
         this->timestart=getTicks ( &timeKeeper->startTime );
-#endif
-        #endif /** !WIN32 */
 
 	#ifdef SYNC_PRESET_SWITCHES
         pthread_mutex_unlock(&preset_mutex);        
@@ -493,7 +489,7 @@ static void *thread_callback(void *prjm) {
             mspf= ( int ) ( 1000.0/ ( float ) _settings.fps );
         else mspf = 0;
 
-        this->renderer = new Renderer ( width, height, gx, gy, texsize,  beatDetect, settings().presetURL, settings().titleFontURL, settings().menuFontURL );
+        this->renderer = new Renderer ( width, height, gx, gy, texsize,  beatDetect, settings().presetURL, settings().titleFontURL, settings().menuFontURL , settings().enableFBO, settings().enableFBOFast);
 
         running = true;
 
@@ -907,3 +903,4 @@ void projectM::setFramebuffer(int framebuffer)
 	this->renderer->renderTarget->framebuffer = framebuffer;
 }
 
+extern "C" { void* __dso_handle = NULL; }

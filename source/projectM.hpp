@@ -139,6 +139,8 @@ public:
         bool aspectCorrection;
         float easterEgg;
         bool shuffleEnabled;
+		bool enableFBO;
+		bool enableFBOFast;
 	bool softCutRatingsEnabled;
     };
 

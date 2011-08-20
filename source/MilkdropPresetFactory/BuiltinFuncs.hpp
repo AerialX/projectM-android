@@ -69,26 +69,26 @@ return arg_list[1];
 
 /* consult your AI book */
 static inline float sigmoid_wrapper(float * arg_list) {
-return (RR / (1 + exp( -(arg_list[0] * arg_list[1]) / R) - R));
+return (RR / (1 + exp( -(((float)(arg_list[0])) * arg_list[1]) / R) - R));
 }
 
 
 static inline float bor_wrapper(float * arg_list) {
 
-return BOOL2FLOAT(FLOAT2BOOL(arg_list[0]) || FLOAT2BOOL(arg_list[1]));
+return (float)((int)arg_list[0] || (int)arg_list[1]);
 }
 
 static inline float band_wrapper(float * arg_list) {
-return BOOL2FLOAT(FLOAT2BOOL(arg_list[0]) && BOOL2FLOAT(arg_list[1]));
+return (float)((int)arg_list[0] && (int)arg_list[1]);
 }
 
 static inline float bnot_wrapper(float * arg_list) {
-return BOOL2FLOAT(!FLOAT2BOOL(arg_list[0]));
+return (float)(!(int)arg_list[0]);
 }
 
 static inline float if_wrapper(float * arg_list) {
 
-if (FLOAT2BOOL(arg_list[0]))
+if ((int)arg_list[0])
 return arg_list[1];
 return arg_list[2];
 }

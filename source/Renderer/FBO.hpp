@@ -65,10 +65,12 @@ public:
   int useFBO;
   int renderToTexture;
   int framebuffer;
+  bool enableFBO;
+  bool enableFBOFast;
 
   ~RenderTarget();
 
-  RenderTarget( int texsize, int width, int height );
+  RenderTarget( int texsize, int width, int height, bool enableFBO, bool enableFBOFast );
   void lock();
   void unlock();
   GLuint initRenderToTexture();

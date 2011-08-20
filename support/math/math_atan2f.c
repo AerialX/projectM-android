@@ -153,12 +153,12 @@ float atan2f_neon_hfp(float y, float x)
 }
 
 
-float atan2f_neon_sfp(float x, float y)
+float atan2f_neon_sfp(float y, float x)
 {
 #ifdef __MATH_NEON
 	asm volatile ("vmov.f32 s0, r0 		\n\t");
 	asm volatile ("vmov.f32 s1, r1 		\n\t");
-	atan2f_neon_hfp(x, y);
+	atan2f_neon_hfp(y, x);
 	asm volatile ("vmov.f32 r0, s0 		\n\t");
 #else
 	return atan2f_c(y, x);

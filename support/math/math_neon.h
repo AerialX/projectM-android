@@ -32,7 +32,7 @@ extern "C" {
 #if !defined(__i386__) && defined(__arm__)
 //if defined neon ASM routines are used, otherwise all calls to *_neon 
 //functions are rerouted to their equivalent *_c function.
-#define __MATH_NEON			
+//#define __MATH_NEON			
 
 //Default Floating Point value ABI: 0=softfp, 1=hardfp. Only effects *_neon routines.
 //You can access the hardfp versions directly via the *_hard suffix. 
@@ -437,13 +437,6 @@ notes:
 float 		invsqrtf_c(float x);
 float 		invsqrtf_neon_hfp(float x);
 float 		invsqrtf_neon_sfp(float x);
-
-static inline int pm_f2b_neon(float x) { int r; asm volatile("":"=r"(r):"r"(x)); return r; }
-static inline float pm_b2f_neon(int x) { float r; asm volatile("":"=r"(r):"r"(x)); return r; }
-#define FLOAT2INT(x) ((int)x)
-#define INT2FLOAT(x) ((float)x)
-#define FLOAT2BOOL pm_f2b_neon
-#define BOOL2FLOAT pm_b2f_neon
 
 #define floor floorf_neon
 #define floorf floorf_neon

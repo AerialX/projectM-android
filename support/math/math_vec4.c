@@ -21,7 +21,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "math_neon.h"
 
+#ifdef __MATH_NEON
 #include "arm_neon.h" 
+#endif
 
 #undef dot4_neon
 
@@ -115,6 +117,7 @@ dot4_neon_hfp(float v0[4], float v1[4])
 }
 
 
+#ifdef __MATH_NEON
 float32_t 
 dot4_neon(float32x4_t v0, float32x4_t v1)
 {	
@@ -129,6 +132,7 @@ dot4_neon(float32x4_t v0, float32x4_t v1)
 	r = vpadd_f32(r, r);
 	return vget_lane_f32(r, 0);
 }
+#endif
 
 float 
 dot4_neon_sfp(float v0[4], float v1[4])

@@ -1,0 +1,17 @@
+-I source
+-I source/MilkdropPresetFactory
+-I source/NativePresetFactory
+-I source/Renderer
+-I source/Renderer/SOIL
+-I source/omptl
+-I support
+-I support/math
+-I /opt/android-ndk/platforms/android-9/arch-arm/usr/include
+-DPROJECTM_INSIDE
+-DLINUX
+-DUSE_GLES1
+-DCMAKE_INSTALL_PREFIX="\"/usr\""
+-DUSE_THREADS
+-DSYNC_PRESET_SWITCHES
+-fno-exceptions
+-frtti

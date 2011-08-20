@@ -168,10 +168,14 @@ float powf_neon_hfp(float x, float n)
 float powf_neon_sfp(float x, float n)
 {
 #ifdef __MATH_NEON
-	asm volatile ("vmov.f32 s0, r0 		\n\t");
-	asm volatile ("vmov.f32 s1, r1 		\n\t");
+	asm volatile (
+	"vmov.f32 d0[0], %0 		\n\t"
+	"vmov.f32 d0[1], %1 		\n\t"
+	::"r"(x), "r"(n):"d0");
 	powf_neon_hfp(x, n);
-	asm volatile ("vmov.f32 r0, s0 		\n\t");
+	float r;
+	asm volatile ("vmov.f32 %0, d0[0] 		\n\t":"=r"(r));
+	return r;
 #else
 	return powf_c(x, n);
 #endif

@@ -102,9 +102,12 @@ support/math
 LOCAL_MODULE					:=	projectM
 LOCAL_MODULE_FILENAME			:=	libprojectM
 LOCAL_SRC_FILES					:=	$(SOURCE)
-LOCAL_C_INCLUDES				:=	$(foreach inc,$(INCLUDE),$(LOCAL_PATH)/$(inc)) /opt/android-ndk/platforms/android-9/arch-arm/usr/include
-LOCAL_LDLIBS					:=	-L/opt/android-ndk/platforms/android-9/arch-arm/usr/lib/ -lGLESv1_CM -llog
-LOCAL_CFLAGS					:=	-DPROJECTM_INSIDE -DLINUX -DUSE_GLES1 -DCMAKE_INSTALL_PREFIX="\"/usr\"" -DUSE_THREADS -DSYNC_PRESET_SWITCHES -fno-exceptions -fno-rtti -mfpu=neon -O0 -DNDEBUG #-DUSE_FBO -pg
+LOCAL_C_INCLUDES				:=	$(foreach inc,$(INCLUDE),$(LOCAL_PATH)/$(inc)) \
+	frameworks/base/opengl/include \
+	frameworks/base/opengl/include/GLES \
+	frameworks/base/include
+LOCAL_LDLIBS					:=	-lGLESv1_CM -llog
+LOCAL_CFLAGS					:=	-DPROJECTM_INSIDE -DLINUX -DUSE_GLES1 -DCMAKE_INSTALL_PREFIX="\"/usr\"" -DUSE_THREADS -DSYNC_PRESET_SWITCHES -fexceptions -frtti -DUSE_FBO -DANDROID_FBO_HACK #-mfpu=neon -pg
 
 #LOCAL_STATIC_LIBRARIES := andprof
 
