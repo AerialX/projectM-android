@@ -109,8 +109,10 @@ LOCAL_C_INCLUDES				:=	$(foreach inc,$(INCLUDE),$(LOCAL_PATH)/$(inc)) \
 	frameworks/base/opengl/include \
 	frameworks/base/opengl/include/GLES \
 	frameworks/base/include
-LOCAL_LDLIBS					:=	-lGLESv1_CM -llog
-LOCAL_CFLAGS					:=	-DPROJECTM_INSIDE -DLINUX -DUSE_GLES1 -DCMAKE_INSTALL_PREFIX="\"/usr\"" -DUSE_THREADS -DSYNC_PRESET_SWITCHES -fexceptions -frtti -DUSE_FBO -DANDROID_FBO_HACK #-mfpu=neon -pg
+LOCAL_LDLIBS					:=	-lGLESv1_CM -llog -lz
+LOCAL_CFLAGS					:=	-DPROJECTM_INSIDE -DLINUX -DUSE_GLES1 -DCMAKE_INSTALL_PREFIX="\"/usr\"" -DUSE_THREADS -DSYNC_PRESET_SWITCHES -fexceptions -frtti -DUSE_FBO -DANDROID_FBO_HACK -DUSE_FILE32API #-mfpu=neon -pg
+LOCAL_CFLAGS					+=	-ffast-math -O3 -funroll-loops #-mfpu=neon
+LOCAL_ARM_MODE					:=	arm
 
 #LOCAL_STATIC_LIBRARIES := andprof
 
