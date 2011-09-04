@@ -52,10 +52,13 @@ source/fftsg.cpp \
 source/projectM.cpp \
 source/timer.cpp \
 source/wipemalloc.cpp \
+source/ZipStreamBuffer.cpp \
 source/Renderer/SOIL/SOIL.c \
 source/Renderer/SOIL/stb_image_aug.c \
 source/Renderer/SOIL/image_DXT.c \
 source/Renderer/SOIL/image_helper.c \
+support/unzip.cpp \
+support/ioapi.cpp \
 support/math/math_acosf.c \
 support/math/math_asinf.c \
 support/math/math_atan2f.c \

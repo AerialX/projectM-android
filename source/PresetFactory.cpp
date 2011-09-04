@@ -1,6 +1,7 @@
 #include "PresetFactory.hpp"
 
 const std::string PresetFactory::IDLE_PRESET_PROTOCOL("idle");
+const std::string PresetFactory::ZIP_PRESET_PROTOCOL("zip");
 
 std::string PresetFactory::protocol(const std::string & url, std::string & path) {
 

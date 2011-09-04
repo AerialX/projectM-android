@@ -55,6 +55,7 @@ public:
     PCM();
     ~PCM();
     void initPCM(int maxsamples);
+	void addAndroidData(const unsigned char* pcm_data, const unsigned char* fft_data, short samples);
     void addPCMfloat(const float *PCMdata, int samples);
     void addPCM16(short [2][512]);
     void addPCM16Data(const short* pcm_data, short samples);

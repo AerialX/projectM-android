@@ -33,6 +33,7 @@
 #include "fftsg.h"
 #include "PCM.hpp"
 #include <cassert>
+#include <math/math_neon.h>
 
 int PCM::maxsamples = 2048;
 
@@ -155,6 +156,31 @@ void PCM::addPCM16Data(const short* pcm_data, short samples)  {
     getPCMnew(pcmdataL,0,0,waveSmoothing,0,1);
     getPCM(vdataL,512,0,1,0,0);
     getPCM(vdataR,512,1,1,0,0);
+}
+
+void PCM::addAndroidData(const unsigned char* pcm_data, const unsigned char* fft_data, short samples)
+{
+	int i, j;
+	for (i = 0; i < samples; i++) {
+		j = i + start;
+		PCMd[0][j % maxsamples]=((int)pcm_data[i] - 0x80) / 128.0;
+		PCMd[1][j % maxsamples]=PCMd[0][j % maxsamples];
+	}
+	vdataL[0] = fft_data[0];
+	vdataL[512 - 1] = fft_data[1];
+
+	for (i = 1; i < 512 - 1 && i * 2 < samples; i++) {
+		int val = (int)fft_data[i * 2] * fft_data[i * 2] + (int)fft_data[i * 2 + 1] * fft_data[i * 2 + 1];
+		vdataL[i] = sqrtf(val);
+	}
+	memcpy(vdataR, vdataL, sizeof(vdataL));
+
+	start = (start + samples) % maxsamples;
+
+	newsamples += samples;
+	if (newsamples > maxsamples)
+		newsamples = maxsamples;
+    getPCMnew(pcmdataL,0,0,waveSmoothing,0,1);
 }
 
 

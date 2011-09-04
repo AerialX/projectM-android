@@ -16,6 +16,7 @@
 #include "Eval.hpp"
 #include "IdlePreset.hpp"
 #include "PresetFrameIO.hpp"
+#include "ZipStreamBuffer.hpp"
 
 MilkdropPresetFactory::MilkdropPresetFactory(int gx, int gy): _usePresetOutputs(false)
 {
@@ -220,10 +221,17 @@ std::auto_ptr<Preset> MilkdropPresetFactory::allocate(const std::string & url, c
 	resetPresetOutputs(presetOutputs);
 
 	std::string path;
-	if (PresetFactory::protocol(url, path) == PresetFactory::IDLE_PRESET_PROTOCOL) {
+	std::string protocol = PresetFactory::protocol(url, path);
+	if (protocol == PresetFactory::IDLE_PRESET_PROTOCOL) {
 		printf("idle %s - %s\n", path.c_str(), name.c_str());
 		return IdlePresets::allocate(path, *presetOutputs);
+	} else if (protocol == PresetFactory::ZIP_PRESET_PROTOCOL) {
+		std::string zipPath = path.substr(0, path.find(".zip"));
+		path = path.substr(path.find(".zip") + 4, path.length());
+		ZipStreamBuffer buffer(zipPath, path);
+		std::istream stream(&buffer);
+		return std::auto_ptr<Preset>(new MilkdropPreset(stream, name, *presetOutputs));
 	} else {
-		return std::auto_ptr<Preset>(new MilkdropPreset(url, name, *presetOutputs));
+		return std::auto_ptr<Preset>(new MilkdropPreset(path, name, *presetOutputs));
 	}
 }

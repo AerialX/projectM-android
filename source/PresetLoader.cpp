@@ -63,6 +63,9 @@ void PresetLoader::rescan()
 
 	// Clear the directory entry collection
 	clear();
+
+	if (_dirname.empty())
+		return;
 	
 	// If directory already opened, close it first
 	if ( _dir )

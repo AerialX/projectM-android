@@ -20,6 +20,7 @@ class PresetFactory {
 
 public:
  static const std::string IDLE_PRESET_PROTOCOL;
+ static const std::string ZIP_PRESET_PROTOCOL;
  static std::string protocol(const std::string & url, std::string & path);
 
  inline PresetFactory() {}
