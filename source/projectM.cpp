@@ -257,6 +257,8 @@ void projectM::readSettings (const Settings & settings )
     _settings.shuffleEnabled = settings.shuffleEnabled;
 
     _settings.easterEgg = settings.easterEgg;
+	_settings.enableFBO = settings.enableFBO;
+	_settings.enableFBOFast = settings.enableFBOFast;
 
     projectM_init ( _settings.meshX, _settings.meshY, _settings.fps,
                     _settings.textureSize, _settings.windowWidth,_settings.windowHeight);

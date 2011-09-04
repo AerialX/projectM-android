@@ -304,49 +304,49 @@ void RenderTarget::unlock() {
 	  GLuint   fb,  depth_rb, rgba_tex,  other_tex;
 	  
 	  glGenTextures(1, &other_tex);
-		checkOpenGL("RenderTarget:genTexture");
+		checkOpenGL("unlock:genTexture");
 	  glBindTexture(GL_TEXTURE_2D,other_tex);
-		checkOpenGL("RenderTarget:bindTexture");
+		checkOpenGL("unlock:bindTexture");
 	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	  //glGenerateMipmapOES(GL_TEXTURE_2D);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		checkOpenGL("RenderTarget:texParams");
+		checkOpenGL("unlock:texParams");
 	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		checkOpenGL("RenderTarget:TexImage2D");
+		checkOpenGL("unlock:TexImage2D");
 	  glBindTexture(GL_TEXTURE_2D, 0);
 	  
 	  glGenTextures(1, &rgba_tex);
-		checkOpenGL("RenderTarget:genTexture");
+		checkOpenGL("unlock:genTexture");
 	  glBindTexture(GL_TEXTURE_2D, rgba_tex); 
 	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	  //glGenerateMipmapOES(GL_TEXTURE_2D);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		checkOpenGL("RenderTarget:texParams");
+		checkOpenGL("unlock:texParams");
 	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		checkOpenGL("RenderTarget:TexImage2D");
+		checkOpenGL("unlock:TexImage2D");
 	  glBindTexture(GL_TEXTURE_2D, 0);
-		checkOpenGL("RenderTarget:bindTexture");
+		checkOpenGL("unlock:bindTexture");
 	
 	  glGenRenderbuffersOES(1, &depth_rb);
-		checkOpenGL("RenderTarget:genRenderbuffer");
+		checkOpenGL("unlock:genRenderbuffer");
 	  glBindRenderbufferOES(GL_RENDERBUFFER_OES, depth_rb);
-		checkOpenGL("RenderTarget:bindRenderbuffer");
+		checkOpenGL("unlock:bindRenderbuffer");
 	  glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, this->texsize, this->texsize);
-		checkOpenGL("RenderTarget:renderbufferStorage");
+		checkOpenGL("unlock:renderbufferStorage");
 	  
 	  glGenFramebuffersOES(1, &fb);
-		checkOpenGL("RenderTarget:genFramebuffer");
+		checkOpenGL("unlock:genFramebuffer");
 	  glBindFramebufferOES(GL_FRAMEBUFFER_OES, fb);
-		checkOpenGL("RenderTarget:bindFramebuffer");
+		checkOpenGL("unlock:bindFramebuffer");
 	  glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, rgba_tex, 0);
-		checkOpenGL("RenderTarget:genFramebufferTexture");
+		checkOpenGL("unlock:genFramebufferTexture");
 	  
 	  glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depth_rb);
-		checkOpenGL("RenderTarget:framebufferRenderbuffer");
+		checkOpenGL("unlock:framebufferRenderbuffer");
 	  
 	  this->fbuffer[0] = fb;
 	  this->depthb[0] = depth_rb;
